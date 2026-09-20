@@ -1,0 +1,12 @@
+'use strict';
+
+const STAGES = Object.freeze({
+  ORIGIN: 'ORIGIN',
+  PROCESSOR: 'PROCESSOR',
+  DISTRIBUTOR: 'DISTRIBUTOR',
+  WALMART_STORE: 'WALMART_STORE',
+  CUSTOMER_SALE: 'CUSTOMER_SALE',
+  STATUS_CHANGE: 'STATUS_CHANGE',
+});
+
+module.exports = { STAGES };

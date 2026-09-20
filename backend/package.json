@@ -1,0 +1,41 @@
+{
+  "name": "food-supply-chain-backend",
+  "version": "1.0.0",
+  "description": "Node.js Express API for Hyperledger Fabric food supply chain traceability",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "test": "mocha --recursive --timeout 10000 --exit test/"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@grpc/grpc-js": "^1.12.6",
+    "@hyperledger/fabric-gateway": "^1.7.1",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "helmet": "^8.0.0",
+    "joi": "^17.13.3",
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.0",
+    "uuid": "^11.0.5"
+  },
+  "devDependencies": {
+    "chai": "^4.5.0",
+    "mocha": "^11.1.0",
+    "sinon": "^19.0.2",
+    "supertest": "^7.0.0"
+  },
+  "keywords": [
+    "hyperledger-fabric",
+    "food-traceability",
+    "express",
+    "supply-chain"
+  ],
+  "license": "Apache-2.0"
+}

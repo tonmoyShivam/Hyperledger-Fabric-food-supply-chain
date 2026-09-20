@@ -1,0 +1,229 @@
+################################################################################
+# configtx.yaml — Food Supply Chain Fabric network (Fabric 2.5)
+################################################################################
+
+Organizations:
+  - &OrdererOrg
+    Name: OrdererOrg
+    ID: OrdererMSP
+    MSPDir: ../organizations/ordererOrganizations/foodchain.com/msp
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('OrdererMSP.member')"
+      Writers:
+        Type: Signature
+        Rule: "OR('OrdererMSP.member')"
+      Admins:
+        Type: Signature
+        Rule: "OR('OrdererMSP.admin')"
+
+  - &FarmOrg
+    Name: FarmOrgMSP
+    ID: FarmOrgMSP
+    MSPDir: ../organizations/peerOrganizations/farm.foodchain.com/msp
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('FarmOrgMSP.admin', 'FarmOrgMSP.peer', 'FarmOrgMSP.client')"
+      Writers:
+        Type: Signature
+        Rule: "OR('FarmOrgMSP.admin', 'FarmOrgMSP.client')"
+      Admins:
+        Type: Signature
+        Rule: "OR('FarmOrgMSP.admin')"
+      Endorsement:
+        Type: Signature
+        Rule: "OR('FarmOrgMSP.peer')"
+    AnchorPeers:
+      - Host: peer0.farm.foodchain.com
+        Port: 7051
+
+  - &ProcessorOrg
+    Name: ProcessorOrgMSP
+    ID: ProcessorOrgMSP
+    MSPDir: ../organizations/peerOrganizations/processor.foodchain.com/msp
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('ProcessorOrgMSP.admin', 'ProcessorOrgMSP.peer', 'ProcessorOrgMSP.client')"
+      Writers:
+        Type: Signature
+        Rule: "OR('ProcessorOrgMSP.admin', 'ProcessorOrgMSP.client')"
+      Admins:
+        Type: Signature
+        Rule: "OR('ProcessorOrgMSP.admin')"
+      Endorsement:
+        Type: Signature
+        Rule: "OR('ProcessorOrgMSP.peer')"
+    AnchorPeers:
+      - Host: peer0.processor.foodchain.com
+        Port: 9051
+
+  - &DistributorOrg
+    Name: DistributorOrgMSP
+    ID: DistributorOrgMSP
+    MSPDir: ../organizations/peerOrganizations/distributor.foodchain.com/msp
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('DistributorOrgMSP.admin', 'DistributorOrgMSP.peer', 'DistributorOrgMSP.client')"
+      Writers:
+        Type: Signature
+        Rule: "OR('DistributorOrgMSP.admin', 'DistributorOrgMSP.client')"
+      Admins:
+        Type: Signature
+        Rule: "OR('DistributorOrgMSP.admin')"
+      Endorsement:
+        Type: Signature
+        Rule: "OR('DistributorOrgMSP.peer')"
+    AnchorPeers:
+      - Host: peer0.distributor.foodchain.com
+        Port: 11051
+
+  - &RetailOrg
+    Name: RetailOrgMSP
+    ID: RetailOrgMSP
+    MSPDir: ../organizations/peerOrganizations/retail.foodchain.com/msp
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('RetailOrgMSP.admin', 'RetailOrgMSP.peer', 'RetailOrgMSP.client')"
+      Writers:
+        Type: Signature
+        Rule: "OR('RetailOrgMSP.admin', 'RetailOrgMSP.client')"
+      Admins:
+        Type: Signature
+        Rule: "OR('RetailOrgMSP.admin')"
+      Endorsement:
+        Type: Signature
+        Rule: "OR('RetailOrgMSP.peer')"
+    AnchorPeers:
+      - Host: peer0.retail.foodchain.com
+        Port: 13051
+
+  - &AuditorOrg
+    Name: AuditorOrgMSP
+    ID: AuditorOrgMSP
+    MSPDir: ../organizations/peerOrganizations/auditor.foodchain.com/msp
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('AuditorOrgMSP.admin', 'AuditorOrgMSP.peer', 'AuditorOrgMSP.client')"
+      Writers:
+        Type: Signature
+        Rule: "OR('AuditorOrgMSP.admin', 'AuditorOrgMSP.client')"
+      Admins:
+        Type: Signature
+        Rule: "OR('AuditorOrgMSP.admin')"
+      Endorsement:
+        Type: Signature
+        Rule: "OR('AuditorOrgMSP.peer')"
+    AnchorPeers:
+      - Host: peer0.auditor.foodchain.com
+        Port: 15051
+
+Capabilities:
+  Channel: &ChannelCapabilities
+    V2_0: true
+  Orderer: &OrdererCapabilities
+    V2_0: true
+  Application: &ApplicationCapabilities
+    V2_5: true
+
+Application: &ApplicationDefaults
+  Organizations:
+  Policies:
+    Readers:
+      Type: ImplicitMeta
+      Rule: "ANY Readers"
+    Writers:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+    Admins:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Admins"
+    LifecycleEndorsement:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Endorsement"
+    Endorsement:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Endorsement"
+  Capabilities:
+    <<: *ApplicationCapabilities
+
+Orderer: &OrdererDefaults
+  OrdererType: etcdraft
+  EtcdRaft:
+    Consenters:
+      - Host: orderer.foodchain.com
+        Port: 7050
+        ClientTLSCert: ../organizations/ordererOrganizations/foodchain.com/orderers/orderer.foodchain.com/tls/server.crt
+        ServerTLSCert: ../organizations/ordererOrganizations/foodchain.com/orderers/orderer.foodchain.com/tls/server.crt
+  Addresses:
+    - orderer.foodchain.com:7050
+  BatchTimeout: 2s
+  BatchSize:
+    MaxMessageCount: 10
+    AbsoluteMaxBytes: 99 MB
+    PreferredMaxBytes: 512 KB
+  Organizations:
+  Policies:
+    Readers:
+      Type: ImplicitMeta
+      Rule: "ANY Readers"
+    Writers:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+    Admins:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Admins"
+    BlockValidation:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+
+Channel: &ChannelDefaults
+  Policies:
+    Readers:
+      Type: ImplicitMeta
+      Rule: "ANY Readers"
+    Writers:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+    Admins:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Admins"
+  Capabilities:
+    <<: *ChannelCapabilities
+
+Profiles:
+  FoodOrdererGenesis:
+    <<: *ChannelDefaults
+    Orderer:
+      <<: *OrdererDefaults
+      Organizations:
+        - *OrdererOrg
+      Capabilities:
+        <<: *OrdererCapabilities
+    Consortiums:
+      FoodConsortium:
+        Organizations:
+          - *FarmOrg
+          - *ProcessorOrg
+          - *DistributorOrg
+          - *RetailOrg
+          - *AuditorOrg
+
+  FoodChannel:
+    Consortium: FoodConsortium
+    <<: *ChannelDefaults
+    Application:
+      <<: *ApplicationDefaults
+      Organizations:
+        - *FarmOrg
+        - *ProcessorOrg
+        - *DistributorOrg
+        - *RetailOrg
+        - *AuditorOrg
+      Capabilities:
+        <<: *ApplicationCapabilities

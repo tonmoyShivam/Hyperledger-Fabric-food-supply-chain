@@ -1,0 +1,35 @@
+node_modules/
+.env
+.env.*
+!.env.example
+dist/
+build/
+coverage/
+*.log
+logs/
+.DS_Store
+Thumbs.db
+
+# Fabric crypto & artifacts (generated — never commit)
+blockchain/network/organizations/
+blockchain/network/channel-artifacts/*
+!blockchain/network/channel-artifacts/.gitkeep
+blockchain/network/bin/
+blockchain/network/crypto-material/
+wallet/
+*.key
+*.pem
+!**/tls/**/*.crt
+*.tar.gz
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# Frontend
+frontend/dist/
+frontend/.vite/
+
+# OS
+desktop.ini

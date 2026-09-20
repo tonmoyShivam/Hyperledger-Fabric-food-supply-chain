@@ -1,0 +1,50 @@
+# Copyright Hyperledger Food Chain demo — cryptogen configuration
+# Fabric 2.5.x compatible
+
+OrdererOrgs:
+  - Name: Orderer
+    Domain: foodchain.com
+    EnableNodeOUs: true
+    Specs:
+      - Hostname: orderer
+
+PeerOrgs:
+  - Name: FarmOrg
+    Domain: farm.foodchain.com
+    EnableNodeOUs: true
+    Template:
+      Count: 1
+    Users:
+      Count: 1
+
+  - Name: ProcessorOrg
+    Domain: processor.foodchain.com
+    EnableNodeOUs: true
+    Template:
+      Count: 1
+    Users:
+      Count: 1
+
+  - Name: DistributorOrg
+    Domain: distributor.foodchain.com
+    EnableNodeOUs: true
+    Template:
+      Count: 1
+    Users:
+      Count: 1
+
+  - Name: RetailOrg
+    Domain: retail.foodchain.com
+    EnableNodeOUs: true
+    Template:
+      Count: 1
+    Users:
+      Count: 1
+
+  - Name: AuditorOrg
+    Domain: auditor.foodchain.com
+    EnableNodeOUs: true
+    Template:
+      Count: 1
+    Users:
+      Count: 1

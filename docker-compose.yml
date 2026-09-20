@@ -1,0 +1,23 @@
+# Root compose: optional backend container (Fabric network is under blockchain/network/)
+version: "3.8"
+
+services:
+  backend:
+    build: ./backend
+    container_name: foodchain-backend
+    ports:
+      - "4000:4000"
+    env_file:
+      - ./backend/.env
+    environment:
+      - PORT=4000
+      - FABRIC_PEER_ORG_PATH=../blockchain/network/organizations/peerOrganizations
+    volumes:
+      - ./blockchain/network/organizations:/app/blockchain/network/organizations:ro
+      - ./backend:/app
+      - /app/node_modules
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    network_mode: host
+    profiles:
+      - full
