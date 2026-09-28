@@ -99,7 +99,17 @@ async function getPublicBatchView(mspId, batchId) {
 }
 
 async function getDashboardStats(mspId) {
-  return fabricService.evaluateTransaction(mspId, 'getDashboardStats');
+  const stats = await fabricService.evaluateTransaction(mspId, 'getDashboardStats');
+  if (!stats || typeof stats !== 'object') return stats;
+  return {
+    ...stats,
+    // Aliases used by the React dashboard
+    safe: stats.safeBatches,
+    contaminated: stats.contaminatedBatches,
+    recalled: (stats.recalledBatches || 0) + (stats.contaminatedBatches || 0),
+    activeRecalls: stats.totalRecalls,
+    recalls: stats.totalRecalls,
+  };
 }
 
 module.exports = {

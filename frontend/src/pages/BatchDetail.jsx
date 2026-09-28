@@ -151,10 +151,15 @@ export default function BatchDetail() {
               'Verify on Fabric'
             )}
           </button>
-          {canContaminate(role) && batch.status !== 'RECALLED' && (
+          {canContaminate(role) && batch.status !== 'RECALLED' && batch.status !== 'CONTAMINATED' && (
             <button type="button" className="btn btn-danger" onClick={() => setRecallOpen(true)}>
               Flag contamination
             </button>
+          )}
+          {(batch.status === 'CONTAMINATED' || batch.status === 'RECALLED') && (
+            <Link className="btn btn-warning" to="/recalls">
+              View recalls
+            </Link>
           )}
           <Link className="btn btn-ghost" to="/batches">
             Back

@@ -50,6 +50,10 @@ export default function Dashboard() {
   }
 
   const s = stats || {};
+  const activeRecalls = s.activeRecalls ?? s.totalRecalls ?? s.recalls ?? 0;
+  const contaminatedCount = s.contaminated ?? s.contaminatedBatches ?? 0;
+  const recalledCount =
+    (s.recalled ?? s.recalledBatches ?? 0) + contaminatedCount;
 
   return (
     <div className="page">
@@ -78,12 +82,13 @@ export default function Dashboard() {
       <div className="stat-grid">
         <StatCard label="Total batches" value={s.totalBatches ?? s.batches ?? 0} tone="info" />
         <StatCard label="Safe" value={s.safe ?? s.safeBatches ?? 0} tone="success" />
+        <StatCard label="Contaminated" value={contaminatedCount} tone="warning" />
         <StatCard
-          label="Contaminated"
-          value={s.contaminated ?? s.contaminatedBatches ?? 0}
-          tone="warning"
+          label="Recalled"
+          value={recalledCount}
+          tone="danger"
+          hint="Batches marked Contaminated or Recalled"
         />
-        <StatCard label="Recalled" value={s.recalled ?? s.recalledBatches ?? 0} tone="danger" />
         <StatCard
           label="Total events"
           value={s.totalEvents ?? s.events ?? 0}
@@ -92,8 +97,9 @@ export default function Dashboard() {
         />
         <StatCard
           label="Active recalls"
-          value={s.activeRecalls ?? s.recalls ?? 0}
+          value={activeRecalls}
           tone="warning"
+          hint="Recall records on the ledger"
         />
       </div>
 

@@ -77,7 +77,7 @@ export default function BatchTable({
                       type="button"
                       className="btn btn-sm btn-danger"
                       onClick={() => onRecall?.(batch)}
-                      disabled={batch.status === 'RECALLED'}
+                      disabled={batch.status === 'RECALLED' || batch.status === 'CONTAMINATED'}
                     >
                       Recall
                     </button>

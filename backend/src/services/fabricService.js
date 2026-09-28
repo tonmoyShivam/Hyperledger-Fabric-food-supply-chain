@@ -212,12 +212,27 @@ async function submitTransaction(orgMsp, name, ...args) {
     if (err instanceof FabricUnavailableError) throw err;
     if (err.code === 'FABRIC_COMMIT_FAILED') throw err;
 
-    const wrapped = new Error(err.message || `Fabric submit failed: ${name}`);
+    const wrapped = new Error(extractFabricMessage(err) || err.message || `Fabric submit failed: ${name}`);
     wrapped.statusCode = 502;
     wrapped.code = 'FABRIC_SUBMIT_ERROR';
     wrapped.cause = err;
     throw wrapped;
   }
+}
+
+function extractFabricMessage(err) {
+  if (!err) return '';
+  const details = err.details || err.cause?.details;
+  if (Array.isArray(details) && details.length) {
+    const parts = details
+      .map((d) => d?.message || d?.Message || (typeof d === 'string' ? d : ''))
+      .filter(Boolean);
+    if (parts.length) return parts.join('; ');
+  }
+  const msg = err.message || '';
+  const match = msg.match(/chaincode response \d+,?\s*(.+)$/i);
+  if (match) return match[1].trim();
+  return msg;
 }
 
 /**
@@ -233,7 +248,7 @@ async function evaluateTransaction(orgMsp, name, ...args) {
     return decodeResult(resultBytes);
   } catch (err) {
     if (err instanceof FabricUnavailableError) throw err;
-    const wrapped = new Error(err.message || `Fabric evaluate failed: ${name}`);
+    const wrapped = new Error(extractFabricMessage(err) || err.message || `Fabric evaluate failed: ${name}`);
     wrapped.statusCode = 502;
     wrapped.code = 'FABRIC_EVALUATE_ERROR';
     wrapped.cause = err;
