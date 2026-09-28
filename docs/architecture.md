@@ -75,3 +75,22 @@ Fabric provides ledger immutability; the hash chain provides demonstrable field-
 
 Route 53 → CloudFront → ALB → EKS (frontend/backend) → Fabric on EKS
 + CloudWatch, Secrets Manager, KMS, S3
+
+## Current limitations (Review 2)
+
+| Limitation | Detail |
+|------------|--------|
+| Demo identities | cryptogen materials, not Fabric CA enrollment |
+| Topology | One peer per organization and a single orderer |
+| Endorsement | Channel policy uses MAJORITY of org endorsement policies; demo is still a single-peer-per-org setup |
+| Resources | About 8 GB RAM recommended for Docker Desktop + WSL2 |
+| Data truth | Ledger integrity is guaranteed after entry; sensors/IoT do not yet prove physical truth |
+
+## Future work
+
+- Fabric CA enrollment for production identities
+- Stricter multi-org AND endorsement where required
+- Multiple Raft orderers and extra peers
+- IoT sensors for automated capture
+- Auditor / regulator-triggered recalls
+- Cloud deployment (e.g. AWS EKS)

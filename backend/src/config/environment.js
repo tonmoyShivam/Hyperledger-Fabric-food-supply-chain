@@ -17,7 +17,7 @@ const environment = Object.freeze({
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || '8h',
   fabricChannelName: process.env.FABRIC_CHANNEL_NAME || 'foodchannel',
   fabricChaincodeName: process.env.FABRIC_CHAINCODE_NAME || 'foodtrace',
-  fabricGatewayPeer: process.env.FABRIC_GATEWAY_PEER || 'localhost:7051',
+  fabricGatewayPeer: process.env.FABRIC_GATEWAY_PEER || '127.0.0.1:7051',
   fabricMock: toBool(process.env.FABRIC_MOCK, false),
   fabricCryptoPath: process.env.FABRIC_CRYPTO_PATH || '../blockchain/network/organizations',
   fabricPeerOrgPath:

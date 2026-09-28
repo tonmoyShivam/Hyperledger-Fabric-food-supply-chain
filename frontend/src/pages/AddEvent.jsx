@@ -4,7 +4,7 @@ import { batchApi } from '../api';
 import EventForm from '../components/EventForm';
 import { useToast } from '../components/Toast';
 import { useAuth } from '../context/AuthContext';
-import { canAddEvent, getErrorMessage } from '../utils/helpers';
+import { canAddEvent, getErrorMessage, unwrapData, unwrapList } from '../utils/helpers';
 
 export default function AddEvent() {
   const { role } = useAuth();
@@ -20,9 +20,9 @@ export default function AddEvent() {
     let cancelled = false;
     async function load() {
       try {
-        const { data } = await batchApi.list();
+        const res = await batchApi.list();
         if (!cancelled) {
-          setBatches(Array.isArray(data) ? data : data.batches || []);
+          setBatches(unwrapList(res));
         }
       } catch (error) {
         if (!cancelled) toast.error(getErrorMessage(error, 'Failed to load batches'));
@@ -48,8 +48,8 @@ export default function AddEvent() {
     setTxInfo(null);
     try {
       const { batchId, ...body } = payload;
-      const { data } = await batchApi.addEvent(batchId, body);
-      setTxInfo(data);
+      const res = await batchApi.addEvent(batchId, body);
+      setTxInfo(unwrapData(res));
       toast.success(`Event recorded for ${batchId}`);
       setTimeout(() => navigate(`/batches/${batchId}`), 800);
     } catch (error) {

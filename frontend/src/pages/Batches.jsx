@@ -6,7 +6,7 @@ import RecallModal from '../components/RecallModal';
 import VerificationStatus from '../components/VerificationStatus';
 import { useToast } from '../components/Toast';
 import { useAuth } from '../context/AuthContext';
-import { canContaminate, getErrorMessage } from '../utils/helpers';
+import { canContaminate, getErrorMessage, unwrapData, unwrapList } from '../utils/helpers';
 
 export default function Batches() {
   const { role } = useAuth();
@@ -24,16 +24,10 @@ export default function Batches() {
   const loadBatches = useCallback(async () => {
     setLoading(true);
     try {
-      let data;
-      if (search.trim()) {
-        const res = await batchApi.search(search.trim());
-        data = res.data;
-      } else {
-        const res = await batchApi.list();
-        data = res.data;
-      }
-      const list = Array.isArray(data) ? data : data.batches || [];
-      setBatches(list);
+      const res = search.trim()
+        ? await batchApi.search(search.trim())
+        : await batchApi.list();
+      setBatches(unwrapList(res));
     } catch (error) {
       toast.error(getErrorMessage(error, 'Failed to load batches'));
     } finally {
@@ -55,8 +49,8 @@ export default function Batches() {
     setVerifying(true);
     setVerifyResult(null);
     try {
-      const { data } = await batchApi.verify(batch.batchId);
-      setVerifyResult({ ...data, batchId: batch.batchId });
+      const res = await batchApi.verify(batch.batchId);
+      setVerifyResult({ ...unwrapData(res), batchId: batch.batchId });
       toast.info(`Verification completed for ${batch.batchId}`);
     } catch (error) {
       toast.error(getErrorMessage(error, 'Verification failed'));

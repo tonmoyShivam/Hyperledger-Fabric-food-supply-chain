@@ -42,11 +42,13 @@ describe('Recall API', () => {
     sinon.stub(fabricService, 'submitTransaction').resolves({
       result: {
         success: true,
-        batch: { batchId: 'BATCH-001', status: 'CONTAMINATED' },
+        batch: { batchId: 'BATCH-001', status: 'RECALLED' },
         recall: {
           recallId: 'REC-2026-BATCH-001',
           batchId: 'BATCH-001',
           reason: 'E. coli detected',
+          status: 'ACTIVE',
+          severity: 'HIGH',
           stores: [{ actor: 'Store 42', location: 'Austin, TX' }],
         },
         transactionId: 'tx-contam-1',
@@ -57,13 +59,15 @@ describe('Recall API', () => {
     const res = await request(app)
       .post('/api/batches/BATCH-001/contaminate')
       .set('Authorization', `Bearer ${storeToken}`)
-      .send({ reason: 'E. coli detected', notes: 'Lab confirmed' });
+      .send({ reason: 'E. coli detected', severity: 'HIGH', notes: 'Lab confirmed' });
 
     expect(res.status).to.equal(201);
-    expect(res.body.data.batch.status).to.equal('CONTAMINATED');
+    expect(res.body.data.batch.status).to.equal('RECALLED');
     expect(res.body.data.recall.recallId).to.equal('REC-2026-BATCH-001');
     expect(fabricService.submitTransaction.firstCall.args[0]).to.equal('RetailOrgMSP');
     expect(fabricService.submitTransaction.firstCall.args[1]).to.equal('flagContamination');
+    const notesArg = fabricService.submitTransaction.firstCall.args[4];
+    expect(JSON.parse(notesArg).severity).to.equal('HIGH');
   });
 
   it('rejects contamination without reason', async () => {

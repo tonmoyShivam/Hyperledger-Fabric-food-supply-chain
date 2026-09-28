@@ -13,6 +13,12 @@ export const STATUS_LABELS = {
   RECALLED: 'Recalled',
 };
 
+export const RECALL_STATUS_LABELS = {
+  NONE: 'Not in recall',
+  AFFECTED: 'Affected by recall',
+  RECALL_TX: 'Recall transaction',
+};
+
 export const ROLE_LABELS = {
   FARM: 'Farm',
   PROCESSOR: 'Processor',
@@ -65,13 +71,54 @@ export function statusClass(status) {
   return 'badge badge-info';
 }
 
+export function transactionRecallStatus(event, batchStatus) {
+  if (event?.recallStatus) return String(event.recallStatus).toUpperCase();
+  const status = String(batchStatus || '').toUpperCase();
+  if (status !== 'CONTAMINATED' && status !== 'RECALLED') return 'NONE';
+  if (String(event?.stage || '').toUpperCase() === 'STATUS_CHANGE') return 'RECALL_TX';
+  return 'AFFECTED';
+}
+
+export function recallStatusClass(recallStatus) {
+  const s = String(recallStatus || '').toUpperCase();
+  if (s === 'RECALL_TX') return 'badge badge-danger';
+  if (s === 'AFFECTED') return 'badge badge-warning';
+  return 'badge badge-success';
+}
+
 export function getErrorMessage(error, fallback = 'Something went wrong') {
-  return (
-    error?.response?.data?.message ||
-    error?.response?.data?.error ||
-    error?.message ||
-    fallback
-  );
+  if (!error?.response) {
+    if (error?.code === 'ERR_NETWORK' || error?.message === 'Network Error') {
+      return 'Cannot reach the API. Is the backend running on port 4000?';
+    }
+    return error?.message || fallback;
+  }
+
+  const payload = error.response.data;
+  if (typeof payload?.error === 'string') return payload.error;
+  if (payload?.error?.message) return payload.error.message;
+  if (typeof payload?.message === 'string') return payload.message;
+  return error.message || fallback;
+}
+
+/**
+ * Unwrap standard API envelope: { success, data } → data
+ * Leave auth-style payloads ({ token, user }) unchanged.
+ */
+export function unwrapData(axiosResponse) {
+  const body = axiosResponse?.data;
+  if (body && typeof body === 'object' && Object.prototype.hasOwnProperty.call(body, 'data') && body.success !== undefined) {
+    return body.data;
+  }
+  return body;
+}
+
+export function unwrapList(axiosResponse) {
+  const data = unwrapData(axiosResponse);
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data?.batches)) return data.batches;
+  if (Array.isArray(data?.recalls)) return data.recalls;
+  return [];
 }
 
 export function canRegisterBatch(role) {

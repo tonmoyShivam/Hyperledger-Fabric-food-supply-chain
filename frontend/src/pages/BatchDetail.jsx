@@ -15,6 +15,7 @@ import {
   statusClass,
   STATUS_LABELS,
   truncateHash,
+  unwrapData,
 } from '../utils/helpers';
 
 export default function BatchDetail() {
@@ -44,9 +45,9 @@ export default function BatchDetail() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const { data } = await batchApi.history(batchId);
-      const nextBatch = data.batch || data;
-      const nextEvents = data.events || data.history || [];
+      const payload = unwrapData(await batchApi.history(batchId));
+      const nextBatch = payload?.batch || payload;
+      const nextEvents = payload?.events || payload?.history || [];
       setBatch(nextBatch);
       setEvents(nextEvents);
       setTamperIndex(0);
@@ -66,8 +67,7 @@ export default function BatchDetail() {
   async function handleVerify() {
     setVerifying(true);
     try {
-      const { data } = await batchApi.verify(batchId);
-      setVerifyResult(data);
+      setVerifyResult(unwrapData(await batchApi.verify(batchId)));
       toast.info('Fabric integrity verification complete');
     } catch (error) {
       toast.error(getErrorMessage(error, 'Verification failed'));
@@ -190,6 +190,21 @@ export default function BatchDetail() {
                 <div>{batch.contaminationReason}</div>
               </div>
             )}
+            <div className="full">
+              <div className="field-label">Transaction recall status</div>
+              <div className="meta-row">
+                {(batch.status === 'RECALLED' || batch.status === 'CONTAMINATED') ? (
+                  <>
+                    <span className="badge badge-danger">Recall active</span>
+                    <span className="muted small">
+                      Supply-chain txs marked Affected; status-change tx is the Recall transaction.
+                    </span>
+                  </>
+                ) : (
+                  <span className="badge badge-success">Not in recall</span>
+                )}
+              </div>
+            </div>
           </div>
         </section>
 
@@ -209,7 +224,7 @@ export default function BatchDetail() {
         <div className="panel-header">
           <h3>Supply-chain timeline</h3>
         </div>
-        <BatchTimeline events={events} />
+        <BatchTimeline events={events} batchStatus={batch.status} />
       </section>
 
       <div className="mt-lg">

@@ -21,8 +21,8 @@ Password for all: `Password123!`
 5. Open batch history → show **Fabric transaction IDs** and hash chain.
 6. **Verify** → ✓ BLOCKCHAIN VERIFIED.
 7. **Integrity Demonstration** → tamper actor in memory → show hash mismatch (ledger unchanged).
-8. **Flag contamination** → Salmonella reason → view **targeted recall** (only actual stores).
-9. Login as **auditor** → Audit page → verify chain.
+8. **Flag contamination** → Salmonella reason → batch status **RECALLED**; timeline shows transaction recall status (**Affected** / **Recall transaction**); view **targeted recall** (only actual stores).
+9. Login as **auditor** → Audit page → verify chain (hashes + recall status column).
 10. Open **/verify/MNG1024** or scan QR → public customer view.
 
 ## Emphasize

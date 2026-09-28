@@ -4,7 +4,7 @@ import { batchApi } from '../api';
 import BatchForm from '../components/BatchForm';
 import { useToast } from '../components/Toast';
 import { useAuth } from '../context/AuthContext';
-import { canRegisterBatch, getErrorMessage } from '../utils/helpers';
+import { canRegisterBatch, getErrorMessage, unwrapData } from '../utils/helpers';
 
 export default function RegisterBatch() {
   const { role } = useAuth();
@@ -26,8 +26,8 @@ export default function RegisterBatch() {
     setSubmitting(true);
     setTxInfo(null);
     try {
-      const { data } = await batchApi.create(payload);
-      setTxInfo(data);
+      const result = unwrapData(await batchApi.create(payload));
+      setTxInfo(result);
       toast.success(`Batch ${payload.batchId} registered on Fabric`);
       setTimeout(() => navigate(`/batches/${payload.batchId}`), 800);
     } catch (error) {

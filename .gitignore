@@ -31,5 +31,10 @@ wallet/
 frontend/dist/
 frontend/.vite/
 
+# Hardhat (Polygon Amoy optional port)
+polygon-amoy/artifacts/
+polygon-amoy/cache/
+polygon-amoy/deployments/
+
 # OS
 desktop.ini

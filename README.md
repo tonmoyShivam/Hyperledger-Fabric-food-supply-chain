@@ -1,4 +1,4 @@
-﻿# Blockchain-Based Food Supply Chain Traceability System
+# Blockchain-Based Food Supply Chain Traceability System
 
 **MTech / academic Hyperledger Fabric project** ΓÇö permissioned ledger tracking food batches from farm ΓåÆ processor ΓåÆ distributor ΓåÆ Walmart store ΓåÆ customer sale.
 
@@ -27,6 +27,7 @@ Channel: `foodchannel` ┬╖ Chaincode: `foodtrace` ┬╖ Fabric: **2.5.16**
 - Auditor verification + in-memory integrity demonstration
 - Public QR verification page
 - Docker Compose network, scripts, Makefile, tests, docs
+- Review 2 status matrix: `docs/review2-status.md`
 
 ## Quick start (WSL2 + Docker Desktop)
 
@@ -118,5 +119,3 @@ cd backend && npm test
 - Single peer per org, single orderer
 - Endorsement policy is OR(any org peer) for demo simplicity
 - Requires Docker Desktop resources (~8 GB RAM recommended)
-
-

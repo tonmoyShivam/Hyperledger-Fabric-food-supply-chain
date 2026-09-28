@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { recallApi } from '../api';
 import { useToast } from '../components/Toast';
-import { formatDate, getErrorMessage, statusClass } from '../utils/helpers';
+import { formatDate, getErrorMessage, statusClass, unwrapList } from '../utils/helpers';
 
 export default function Recalls() {
   const toast = useToast();
@@ -14,9 +14,9 @@ export default function Recalls() {
     async function load() {
       setLoading(true);
       try {
-        const { data } = await recallApi.list();
+        const res = await recallApi.list();
         if (!cancelled) {
-          setRecalls(Array.isArray(data) ? data : data.recalls || []);
+          setRecalls(unwrapList(res));
         }
       } catch (error) {
         if (!cancelled) toast.error(getErrorMessage(error, 'Failed to load recalls'));
@@ -63,6 +63,7 @@ export default function Recalls() {
                 <th>Reason</th>
                 <th>Severity</th>
                 <th>Status</th>
+                <th>Recall Tx</th>
                 <th>Created</th>
                 <th>Touchpoints</th>
               </tr>
@@ -79,17 +80,24 @@ export default function Recalls() {
                   <td>{recall.reason || recall.contaminationReason || '—'}</td>
                   <td>{recall.severity || '—'}</td>
                   <td>
-                    <span className={statusClass(recall.status || 'RECALLED')}>
-                      {recall.status || 'RECALLED'}
+                    <span className={statusClass(recall.status === 'ACTIVE' ? 'RECALLED' : recall.status || 'RECALLED')}>
+                      {recall.status || 'ACTIVE'}
                     </span>
                   </td>
-                  <td>{formatDate(recall.createdAt || recall.timestamp)}</td>
+                  <td className="mono small" title={recall.transactionId}>
+                    {recall.transactionId
+                      ? `${String(recall.transactionId).slice(0, 10)}…`
+                      : '—'}
+                  </td>
+                  <td>{formatDate(recall.createdAt || recall.generatedAt || recall.timestamp)}</td>
                   <td>
-                    {Array.isArray(recall.touchpoints)
-                      ? recall.touchpoints.length
-                      : recall.affectedLocations?.length ??
-                        recall.eventCount ??
-                        '—'}
+                    {Array.isArray(recall.pathActors)
+                      ? recall.pathActors.length
+                      : Array.isArray(recall.touchpoints)
+                        ? recall.touchpoints.length
+                        : recall.affectedLocations?.length ??
+                          recall.eventCount ??
+                          '—'}
                   </td>
                 </tr>
               ))}

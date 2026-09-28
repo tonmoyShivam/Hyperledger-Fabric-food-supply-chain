@@ -667,6 +667,14 @@ code,
   margin-bottom: 0.75rem;
 }
 
+.timeline-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  justify-content: flex-end;
+  align-items: flex-start;
+}
+
 .timeline-stage {
   font-weight: 700;
 }

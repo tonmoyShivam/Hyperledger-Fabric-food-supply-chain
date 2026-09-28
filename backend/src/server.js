@@ -21,7 +21,7 @@ process.on('SIGINT', () => shutdown('SIGINT'));
 process.on('SIGTERM', () => shutdown('SIGTERM'));
 
 if (require.main === module) {
-  app.listen(environment.port, () => {
+  app.listen(environment.port, '0.0.0.0', () => {
     logger.info('Food supply chain API listening', {
       port: environment.port,
       channel: environment.fabricChannelName,

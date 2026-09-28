@@ -2,7 +2,15 @@ import { useEffect, useState } from 'react';
 import { batchApi } from '../api';
 import VerificationStatus from '../components/VerificationStatus';
 import { useToast } from '../components/Toast';
-import { getErrorMessage, STAGE_LABELS } from '../utils/helpers';
+import {
+  getErrorMessage,
+  STAGE_LABELS,
+  unwrapData,
+  unwrapList,
+  transactionRecallStatus,
+  recallStatusClass,
+  RECALL_STATUS_LABELS,
+} from '../utils/helpers';
 
 export default function Audit() {
   const toast = useToast();
@@ -19,9 +27,9 @@ export default function Audit() {
     async function load() {
       setLoadingBatches(true);
       try {
-        const { data } = await batchApi.list();
+        const res = await batchApi.list();
         if (!cancelled) {
-          const list = Array.isArray(data) ? data : data.batches || [];
+          const list = unwrapList(res);
           setBatches(list);
           if (list.length && !batchId) setBatchId(list[0].batchId);
         }
@@ -47,12 +55,12 @@ export default function Audit() {
     try {
       const [verifyRes, integrityRes, historyRes] = await Promise.all([
         batchApi.verify(batchId),
-        batchApi.integrity(batchId).catch(() => ({ data: null })),
+        batchApi.integrity(batchId).catch(() => null),
         batchApi.history(batchId),
       ]);
-      setResult(verifyRes.data);
-      setIntegrity(integrityRes.data);
-      setHistory(historyRes.data);
+      setResult(unwrapData(verifyRes));
+      setIntegrity(integrityRes ? unwrapData(integrityRes) : null);
+      setHistory(unwrapData(historyRes));
       toast.success(`Audit complete for ${batchId}`);
     } catch (error) {
       toast.error(getErrorMessage(error, 'Audit failed'));
@@ -60,6 +68,8 @@ export default function Audit() {
       setVerifying(false);
     }
   }
+
+  const batchStatus = history?.batch?.status;
 
   return (
     <div className="page">
@@ -117,22 +127,31 @@ export default function Audit() {
                   <th>Stage</th>
                   <th>Actor / Org</th>
                   <th>Tx ID</th>
+                  <th>Recall status</th>
                   <th>Hash</th>
                 </tr>
               </thead>
               <tbody>
-                {history.events.map((ev) => (
-                  <tr key={ev.eventId || ev.index}>
-                    <td>{ev.index}</td>
-                    <td>{STAGE_LABELS[ev.stage] || ev.stage}</td>
-                    <td>
-                      {ev.actor}
-                      <div className="muted small">{ev.actorOrg}</div>
-                    </td>
-                    <td className="mono small">{ev.transactionId || '—'}</td>
-                    <td className="mono small">{ev.hash}</td>
-                  </tr>
-                ))}
+                {history.events.map((ev) => {
+                  const recallStatus = transactionRecallStatus(ev, batchStatus);
+                  return (
+                    <tr key={ev.eventId || ev.index}>
+                      <td>{ev.index}</td>
+                      <td>{STAGE_LABELS[ev.stage] || ev.stage}</td>
+                      <td>
+                        {ev.actor}
+                        <div className="muted small">{ev.actorOrg}</div>
+                      </td>
+                      <td className="mono small">{ev.transactionId || '—'}</td>
+                      <td>
+                        <span className={recallStatusClass(recallStatus)}>
+                          {RECALL_STATUS_LABELS[recallStatus] || recallStatus}
+                        </span>
+                      </td>
+                      <td className="mono small">{ev.hash}</td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

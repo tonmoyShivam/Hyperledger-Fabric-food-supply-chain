@@ -1,4 +1,11 @@
-import { formatDate, STAGE_LABELS, truncateHash } from '../utils/helpers';
+import {
+  formatDate,
+  STAGE_LABELS,
+  truncateHash,
+  transactionRecallStatus,
+  recallStatusClass,
+  RECALL_STATUS_LABELS,
+} from '../utils/helpers';
 
 function detailsText(details) {
   if (!details) return '—';
@@ -10,7 +17,7 @@ function detailsText(details) {
   }
 }
 
-export default function BatchTimeline({ events = [], loading = false }) {
+export default function BatchTimeline({ events = [], batchStatus = 'SAFE', loading = false }) {
   if (loading) {
     return (
       <div className="panel loading-panel">
@@ -31,61 +38,77 @@ export default function BatchTimeline({ events = [], loading = false }) {
 
   return (
     <ol className="timeline">
-      {events.map((event) => (
-        <li key={event.eventId || `${event.batchId}-${event.index}`} className="timeline-item">
-          <div className="timeline-marker" />
-          <div className="timeline-card">
-            <div className="timeline-header">
-              <div>
-                <span className="timeline-stage">
-                  #{event.index} · {STAGE_LABELS[event.stage] || event.stage}
-                </span>
-                <div className="timeline-meta">{formatDate(event.timestamp)}</div>
+      {events.map((event) => {
+        const recallStatus = transactionRecallStatus(event, batchStatus);
+        return (
+          <li key={event.eventId || `${event.batchId}-${event.index}`} className="timeline-item">
+            <div className="timeline-marker" />
+            <div className="timeline-card">
+              <div className="timeline-header">
+                <div>
+                  <span className="timeline-stage">
+                    #{event.index} · {STAGE_LABELS[event.stage] || event.stage}
+                  </span>
+                  <div className="timeline-meta">{formatDate(event.timestamp)}</div>
+                </div>
+                <div className="timeline-badges">
+                  <span className="badge badge-info">{event.actorOrg}</span>
+                  <span className={recallStatusClass(recallStatus)} title="Transaction recall status">
+                    {RECALL_STATUS_LABELS[recallStatus] || recallStatus}
+                  </span>
+                </div>
               </div>
-              <span className="badge badge-info">{event.actorOrg}</span>
-            </div>
 
-            <div className="timeline-grid">
-              <div>
-                <div className="field-label">Actor</div>
-                <div>{event.actor}</div>
+              <div className="timeline-grid">
+                <div>
+                  <div className="field-label">Actor</div>
+                  <div>{event.actor}</div>
+                </div>
+                <div>
+                  <div className="field-label">Organization</div>
+                  <div>{event.actorOrg}</div>
+                </div>
+                <div>
+                  <div className="field-label">Location</div>
+                  <div>{event.location}</div>
+                </div>
+                <div>
+                  <div className="field-label">Fabric Tx ID</div>
+                  <div className="mono small">{event.transactionId || '—'}</div>
+                </div>
+                <div>
+                  <div className="field-label">Recall status</div>
+                  <div>
+                    <span className={recallStatusClass(recallStatus)}>
+                      {RECALL_STATUS_LABELS[recallStatus] || recallStatus}
+                    </span>
+                  </div>
+                </div>
               </div>
-              <div>
-                <div className="field-label">Organization</div>
-                <div>{event.actorOrg}</div>
-              </div>
-              <div>
-                <div className="field-label">Location</div>
-                <div>{event.location}</div>
-              </div>
-              <div>
-                <div className="field-label">Fabric Tx ID</div>
-                <div className="mono small">{event.transactionId || '—'}</div>
-              </div>
-            </div>
 
-            <div className="timeline-details">
-              <div className="field-label">Details</div>
-              <pre className="code-block">{detailsText(event.details)}</pre>
-            </div>
+              <div className="timeline-details">
+                <div className="field-label">Details</div>
+                <pre className="code-block">{detailsText(event.details)}</pre>
+              </div>
 
-            <div className="hash-row">
-              <div>
-                <div className="field-label">Previous Hash</div>
-                <code className="mono" title={event.previousHash}>
-                  {truncateHash(event.previousHash, 12)}
-                </code>
-              </div>
-              <div>
-                <div className="field-label">Hash</div>
-                <code className="mono" title={event.hash}>
-                  {truncateHash(event.hash, 12)}
-                </code>
+              <div className="hash-row">
+                <div>
+                  <div className="field-label">Previous Hash</div>
+                  <code className="mono" title={event.previousHash}>
+                    {truncateHash(event.previousHash, 12)}
+                  </code>
+                </div>
+                <div>
+                  <div className="field-label">Hash</div>
+                  <code className="mono" title={event.hash}>
+                    {truncateHash(event.hash, 12)}
+                  </code>
+                </div>
               </div>
             </div>
-          </div>
-        </li>
-      ))}
+          </li>
+        );
+      })}
     </ol>
   );
 }

@@ -17,7 +17,7 @@ const ORG_CONFIG = Object.freeze({
   FarmOrgMSP: {
     mspId: 'FarmOrgMSP',
     role: 'FARM',
-    peerEndpoint: 'localhost:7051',
+    peerEndpoint: '127.0.0.1:7051',
     peerHostAlias: 'peer0.farm.foodchain.com',
     domain: 'farm.foodchain.com',
     tlsCertPath: path.join(
@@ -48,7 +48,7 @@ const ORG_CONFIG = Object.freeze({
   ProcessorOrgMSP: {
     mspId: 'ProcessorOrgMSP',
     role: 'PROCESSOR',
-    peerEndpoint: 'localhost:9051',
+    peerEndpoint: '127.0.0.1:9051',
     peerHostAlias: 'peer0.processor.foodchain.com',
     domain: 'processor.foodchain.com',
     tlsCertPath: path.join(
@@ -79,7 +79,7 @@ const ORG_CONFIG = Object.freeze({
   DistributorOrgMSP: {
     mspId: 'DistributorOrgMSP',
     role: 'DISTRIBUTOR',
-    peerEndpoint: 'localhost:11051',
+    peerEndpoint: '127.0.0.1:11051',
     peerHostAlias: 'peer0.distributor.foodchain.com',
     domain: 'distributor.foodchain.com',
     tlsCertPath: path.join(
@@ -110,7 +110,7 @@ const ORG_CONFIG = Object.freeze({
   RetailOrgMSP: {
     mspId: 'RetailOrgMSP',
     role: 'STORE_ADMIN',
-    peerEndpoint: 'localhost:13051',
+    peerEndpoint: '127.0.0.1:13051',
     peerHostAlias: 'peer0.retail.foodchain.com',
     domain: 'retail.foodchain.com',
     tlsCertPath: path.join(
@@ -141,7 +141,7 @@ const ORG_CONFIG = Object.freeze({
   AuditorOrgMSP: {
     mspId: 'AuditorOrgMSP',
     role: 'AUDITOR',
-    peerEndpoint: 'localhost:15051',
+    peerEndpoint: '127.0.0.1:15051',
     peerHostAlias: 'peer0.auditor.foodchain.com',
     domain: 'auditor.foodchain.com',
     tlsCertPath: path.join(

@@ -8,6 +8,7 @@ import {
   getErrorMessage,
   statusClass,
   STATUS_LABELS,
+  unwrapData,
 } from '../utils/helpers';
 
 export default function VerifyPublic() {
@@ -23,7 +24,7 @@ export default function VerifyPublic() {
       setError('');
       try {
         const res = await publicApi.verify(batchId);
-        if (!cancelled) setData(res.data);
+        if (!cancelled) setData(unwrapData(res));
       } catch (err) {
         if (!cancelled) setError(getErrorMessage(err, 'Unable to verify batch'));
       } finally {
@@ -37,7 +38,7 @@ export default function VerifyPublic() {
   }, [batchId]);
 
   const batch = data?.batch || data;
-  const events = data?.events || data?.history || [];
+  const events = data?.events || data?.journey || data?.history || [];
   const verification = data?.verification || data?.integrity || data?.verifyResult || null;
 
   return (

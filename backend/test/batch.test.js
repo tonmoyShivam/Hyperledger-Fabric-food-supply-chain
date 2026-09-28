@@ -198,7 +198,7 @@ describe('Batch API', () => {
     const res = await request(app).get('/api/public/verify/BATCH-001');
     expect(res.status).to.equal(200);
     expect(res.body.data.batchId).to.equal('BATCH-001');
-    expect(fabricService.evaluateTransaction.firstCall.args[0]).to.equal('FarmOrgMSP');
+    expect(fabricService.evaluateTransaction.firstCall.args[0]).to.equal('AuditorOrgMSP');
     expect(fabricService.evaluateTransaction.firstCall.args[1]).to.equal('getPublicBatchView');
   });
 });

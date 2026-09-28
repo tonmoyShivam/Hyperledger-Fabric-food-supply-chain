@@ -2,13 +2,17 @@
 
 const fabricService = require('./fabricService');
 
-async function flagContamination(mspId, batchId, { reason, notes }) {
+async function flagContamination(mspId, batchId, { reason, notes, severity }) {
+  const notesPayload = JSON.stringify({
+    severity: severity || 'HIGH',
+    notes: notes || 'Contamination reported',
+  });
   const { result, transactionId } = await fabricService.submitTransaction(
     mspId,
     'flagContamination',
     batchId,
     reason,
-    notes || ''
+    notesPayload
   );
   return { ...result, transactionId: result?.transactionId || transactionId };
 }

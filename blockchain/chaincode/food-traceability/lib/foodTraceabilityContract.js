@@ -325,7 +325,11 @@ class FoodTraceabilityContract extends Contract {
     const batch = await this._getBatchOrNull(ctx, batchId);
     assert(batch, `Batch ${batchId} not found`);
     const events = await this._getEvents(ctx, batchId);
-    return JSON.stringify({ batch, events });
+    const enriched = events.map((e) => ({
+      ...e,
+      recallStatus: this._transactionRecallStatus(e, batch.status),
+    }));
+    return JSON.stringify({ batch, events: enriched });
   }
 
   async getEventsByActor(ctx, actor) {
@@ -443,13 +447,17 @@ class FoodTraceabilityContract extends Contract {
 
     const batch = await this._getBatchOrNull(ctx, batchId);
     assert(batch, `Batch ${batchId} not found`);
-    assert(batch.status !== STATUS.CONTAMINATED, `Batch ${batchId} is already contaminated`);
+    assert(
+      batch.status !== STATUS.CONTAMINATED && batch.status !== STATUS.RECALLED,
+      `Batch ${batchId} is already contaminated or recalled`
+    );
 
     const events = await this._getEvents(ctx, batchId);
     const previous = events[events.length - 1];
     const index = events.length;
     const txId = ctx.stub.getTxID();
     const timestamp = this._txTimestamp(ctx);
+    const severity = this._parseSeverity(notes);
 
     const eventBase = {
       eventId: `${batchId}-${index}`,
@@ -462,18 +470,21 @@ class FoodTraceabilityContract extends Contract {
       timestamp,
       details: {
         previousStatus: batch.status,
-        newStatus: STATUS.CONTAMINATED,
+        newStatus: STATUS.RECALLED,
         reason: String(reason).trim(),
+        severity,
         notes: notes ? String(notes).trim() : 'Contamination reported',
+        recallStatus: 'RECALL_TX',
       },
       previousHash: previous.hash,
       transactionId: txId,
+      recallStatus: 'RECALL_TX',
     };
     const hash = hashEvent(eventBase);
     const event = { ...eventBase, hash };
     events.push(event);
 
-    batch.status = STATUS.CONTAMINATED;
+    batch.status = STATUS.RECALLED;
     batch.contaminationReason = String(reason).trim();
     batch.contaminationTimestamp = timestamp;
     batch.eventCount = events.length;
@@ -483,7 +494,7 @@ class FoodTraceabilityContract extends Contract {
     await this._putEvents(ctx, batchId, events);
     await this._putBatch(ctx, batch);
 
-    const recall = await this._buildRecall(ctx, batch, events, reason, txId, timestamp);
+    const recall = await this._buildRecall(ctx, batch, events, reason, txId, timestamp, severity);
     await ctx.stub.putState(RECALL_PREFIX + recall.recallId, Buffer.from(JSON.stringify(recall)));
     await this._addToIndex(ctx, RECALL_INDEX, recall.recallId);
 
@@ -613,7 +624,7 @@ class FoodTraceabilityContract extends Contract {
     });
   }
 
-  async _buildRecall(ctx, batch, events, reason, txId, timestamp) {
+  async _buildRecall(ctx, batch, events, reason, txId, timestamp, severity = 'HIGH') {
     const origin = events.find((e) => e.stage === STAGES.ORIGIN);
     const processors = events
       .filter((e) => e.stage === STAGES.PROCESSOR)
@@ -644,6 +655,8 @@ class FoodTraceabilityContract extends Contract {
       batchId: batch.batchId,
       product: batch.product,
       reason: String(reason).trim(),
+      severity: String(severity || 'HIGH').toUpperCase(),
+      status: 'ACTIVE',
       origin: origin
         ? { actor: origin.actor, location: origin.location, timestamp: origin.timestamp, org: origin.actorOrg }
         : null,
@@ -668,10 +681,34 @@ class FoodTraceabilityContract extends Contract {
         timestamp: e.timestamp,
         hash: e.hash,
         transactionId: e.transactionId,
+        recallStatus: this._transactionRecallStatus(e, batch.status),
       })),
       generatedAt: timestamp,
       transactionId: txId,
     };
+  }
+
+  _transactionRecallStatus(event, batchStatus) {
+    const status = String(batchStatus || '').toUpperCase();
+    if (status !== STATUS.CONTAMINATED && status !== STATUS.RECALLED) {
+      return 'NONE';
+    }
+    if (event?.stage === STAGES.STATUS_CHANGE) return 'RECALL_TX';
+    return 'AFFECTED';
+  }
+
+  _parseSeverity(notes) {
+    if (!notes) return 'HIGH';
+    const raw = String(notes).trim();
+    try {
+      const parsed = JSON.parse(raw);
+      if (parsed && parsed.severity) return String(parsed.severity).toUpperCase();
+    } catch {
+      // plain severity string or free-form notes
+    }
+    const upper = raw.toUpperCase();
+    if (['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'].includes(upper)) return upper;
+    return 'HIGH';
   }
 
   _txTimestamp(ctx) {

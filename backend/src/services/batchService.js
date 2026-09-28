@@ -38,7 +38,23 @@ async function batchExists(mspId, batchId) {
 }
 
 async function getBatchHistory(mspId, batchId) {
-  return fabricService.evaluateTransaction(mspId, 'getBatchHistory', batchId);
+  const history = await fabricService.evaluateTransaction(mspId, 'getBatchHistory', batchId);
+  if (!history || typeof history !== 'object') return history;
+  const batchStatus = history.batch?.status;
+  const events = Array.isArray(history.events)
+    ? history.events.map((event) => ({
+        ...event,
+        recallStatus: event.recallStatus || deriveTransactionRecallStatus(event, batchStatus),
+      }))
+    : [];
+  return { ...history, events };
+}
+
+function deriveTransactionRecallStatus(event, batchStatus) {
+  const status = String(batchStatus || '').toUpperCase();
+  if (status !== 'CONTAMINATED' && status !== 'RECALLED') return 'NONE';
+  if (String(event?.stage || '').toUpperCase() === 'STATUS_CHANGE') return 'RECALL_TX';
+  return 'AFFECTED';
 }
 
 async function searchBatches(mspId, query) {

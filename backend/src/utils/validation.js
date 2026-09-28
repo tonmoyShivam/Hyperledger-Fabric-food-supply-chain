@@ -27,6 +27,7 @@ const addEventSchema = Joi.object({
 
 const contaminateSchema = Joi.object({
   reason: Joi.string().trim().min(3).max(500).required(),
+  severity: Joi.string().valid('LOW', 'MEDIUM', 'HIGH', 'CRITICAL').default('HIGH'),
   notes: Joi.string().trim().max(1000).allow('', null).optional(),
 });
 

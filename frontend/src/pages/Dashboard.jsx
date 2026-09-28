@@ -4,7 +4,7 @@ import { dashboardApi, batchApi } from '../api';
 import StatCard from '../components/StatCard';
 import { useToast } from '../components/Toast';
 import { useAuth } from '../context/AuthContext';
-import { canRegisterBatch, canAddEvent, formatDate, getErrorMessage, statusClass, STATUS_LABELS } from '../utils/helpers';
+import { canRegisterBatch, canAddEvent, formatDate, getErrorMessage, statusClass, STATUS_LABELS, unwrapData, unwrapList } from '../utils/helpers';
 
 export default function Dashboard() {
   const { role } = useAuth();
@@ -24,11 +24,9 @@ export default function Dashboard() {
           batchApi.list(),
         ]);
         if (cancelled) return;
-        setStats(statsRes.data.stats || statsRes.data);
-        const batches = Array.isArray(batchesRes.data)
-          ? batchesRes.data
-          : batchesRes.data.batches || [];
-        setRecent(batches.slice(0, 5));
+        const statsPayload = unwrapData(statsRes);
+        setStats(statsPayload?.stats || statsPayload);
+        setRecent(unwrapList(batchesRes).slice(0, 5));
       } catch (error) {
         if (!cancelled) toast.error(getErrorMessage(error, 'Failed to load dashboard'));
       } finally {
